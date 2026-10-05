@@ -99,6 +99,45 @@
             width: 100%;
         }
 
+        .menu-toggle {
+            display: none;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-toggle svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .menu-toggle line {
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            transition: transform 0.2s, opacity 0.2s;
+            transform-origin: center;
+        }
+
+        .menu-toggle[aria-expanded="true"] line:first-child {
+            transform: translateY(6px) rotate(45deg);
+        }
+
+        .menu-toggle[aria-expanded="true"] line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle[aria-expanded="true"] line:last-child {
+            transform: translateY(-6px) rotate(-45deg);
+        }
+
         /* Hero Section */
         .hero {
             min-height: 100vh;
@@ -761,8 +800,34 @@
         }
 
         @media (max-width: 768px) {
-            nav { padding: 1rem 1.5rem; }
-            .nav-links { display: none; }
+            nav {
+                padding: 0.75rem 1rem;
+                flex-wrap: wrap;
+            }
+            .menu-toggle { display: inline-flex; }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: calc(100% + 0.5rem);
+                left: 1rem;
+                right: 1rem;
+                flex-direction: column;
+                gap: 0;
+                padding: 0.5rem;
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px;
+                background: rgba(17,17,17,0.97);
+                box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+            }
+            nav.menu-open .nav-links { display: flex; }
+            .nav-links a {
+                display: block;
+                padding: 0.85rem 1rem;
+                border-radius: 10px;
+                font-size: 1rem;
+            }
+            .nav-links a:hover { background: var(--surface-2); }
+            .nav-links a::after { display: none; }
             .stats { flex-direction: column; gap: 2rem; }
             .projects-grid { grid-template-columns: 1fr; }
             .hero-buttons { flex-direction: column; align-items: center; }
@@ -774,13 +839,20 @@
 
     <nav>
         <div class="logo">PORTFOLIO</div>
-        <ul class="nav-links">
+        <ul class="nav-links" id="primary-navigation">
             <li><a href="#home">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#projects">Projects</a></li>
             <li><a href="#skills">Skills</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
+        <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-navigation">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+        </button>
     </nav>
 
     <!-- Hero -->
@@ -1066,7 +1138,7 @@
             <a href="mailto:hello@example.com" class="btn btn-primary">riyad16-645@diu.edu.bd</a>
             <div class="social-links">
                 <a href="https://github.com/reander69" class="social-link" title="GitHub">GH</a>
-                <a href="https://instagram.com/r_e_a_n_d_e_r" class="social-link" title="Instagram">IG</a>
+                <a href="https://www.linkedin.com/in/kamrul-hasan-565b43331/" class="social-link" title="LinkedIn">LI</a>
                 <a href="https://x.com/@r_e_a_n_d_e_r" class="social-link" title="Twitter">TW</a>
                 <a href="https://wa.me/1858620826" class="social-link" title="WhatsApp">WA</a>
             </div>
@@ -1187,6 +1259,35 @@
             });
         }, { threshold: 0.5 });
         skillBars.forEach(el => skillObserver.observe(el));
+
+        // Mobile navigation menu
+        const nav = document.querySelector('nav');
+        const menuToggle = document.querySelector('.menu-toggle');
+
+        function setMenuOpen(isOpen) {
+            nav.classList.toggle('menu-open', isOpen);
+            menuToggle.setAttribute('aria-expanded', String(isOpen));
+            menuToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            setMenuOpen(menuToggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        nav.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => setMenuOpen(false));
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+                setMenuOpen(false);
+                menuToggle.focus();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) setMenuOpen(false);
+        });
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
